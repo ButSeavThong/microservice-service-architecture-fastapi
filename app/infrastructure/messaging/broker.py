@@ -1,23 +1,15 @@
 # app/infrastructure/messaging/broker.py
 
 from faststream.kafka import KafkaBroker
+from faststream import  FastStream
 from app.core.config import settings
 from app.core.logger import get_logger
+
 
 logger = get_logger(__name__)
 
 broker = KafkaBroker(
     bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
-    # ── Consumer group: all replicas of profile-service
-    #    share this group → each message is processed by ONE instance.
-    #    This is Kafka's horizontal scaling mechanism.
-    group_id=settings.KAFKA_CONSUMER_GROUP,
-
-    # ── Reliability settings ──────────────────────────────────
-    # acks="all": Producer waits for ALL in-sync Kafka replicas to
-    # acknowledge before considering the message "sent".
-    # This prevents data loss if a broker crashes mid-write.
-    # Tradeoff: slightly higher latency, much higher durability.
 )
 
 """

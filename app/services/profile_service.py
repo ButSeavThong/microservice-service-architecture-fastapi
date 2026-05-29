@@ -11,11 +11,8 @@ from app.infrastructure.messaging.broker import broker
 from app.infrastructure.cache.valkey_client import ProfileCache
 from app.models.profile import Profile
 from app.repositories.profile_repository import ProfileRepository
-from app.schemas.events.identity_events import (
-    ProfileCreatedEvent,
-    ProfileUpdatedEvent,
-)
-from app.schemas.profile_schema import ProfileUpdateRequest, ProfileResponse
+from app.schemas.events.profile_events import ProfileCreatedEvent, ProfileUpdatedEvent
+from app.schemas.profile_schema import ProfileResponse, ProfileUpdateRequest
 from app.core.config import settings
 
 logger = get_logger(__name__)
