@@ -1,0 +1,97 @@
+services:
+  profile-db:
+    image: postgres:16-alpine
+    container_name: profile-db
+    restart: always
+    environment:
+      POSTGRES_DB: profile_db
+      POSTGRES_USER: thong
+      POSTGRES_PASSWORD: password
+    volumes:
+      - profile_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - micro-net
+  kafka-profile:
+    image: confluentinc/cp-kafka:7.8.0
+    container_name: kafka-profile
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-profile:9091"
+      KAFKA_LISTENERS: "PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:9092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka-profile:9090,EXTERNAL://localhost:9092"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      CLUSTER_ID: "4L6g3nShT-eMCtK--X86sw"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+    volumes:
+      - kafka_profile_vol:/var/lib/kafka/data
+    networks:
+      - micro-net
+
+  kafka-profile-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-profile-ui
+    ports:
+      - "18000:8080"
+    environment:
+      AUTH_TYPE: "LOGIN_FORM"
+      SPRING_SECURITY_USER_NAME: admin
+      SPRING_SECURITY_USER_PASSWORD: qwer
+
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka-profile:9090"
+    depends_on:
+      - kafka-profile
+    networks:
+      - micro-net
+
+  valkey:
+    container_name: valkey
+    image: valkey/valkey:latest
+    ports:
+      - 6379:6379
+    volumes:
+      - valkey_data:/data
+    command: valkey-server --protected-mode no --appendonly yes
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - micro-net
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    volumes:
+    - redisinsight_data:/data
+    networks:
+      - micro-net
+    depends_on:
+      - valkey
+
+volumes:
+  kafka_profile_vol:
+  profile_data:
+  valkey_data: 
+  redisinsight_data:
+
+networks:
+  micro-net:
+    driver: bridge
+
+
