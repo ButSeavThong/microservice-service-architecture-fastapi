@@ -1,12 +1,19 @@
 from contextlib import asynccontextmanager
+<<<<<<< HEAD
 import asyncio
+=======
+
+>>>>>>> 19068ed643c0799e8a3abdf12973e59a3cbef28c
 from fastapi import FastAPI
 
 from app.api.routes import profile_routes
 from app.core.config import settings
 from app.core.logger import get_logger, setup_logging
 from app.infrastructure.messaging.broker import broker
+<<<<<<< HEAD
 from app.infrastructure.messaging.consumers.identity_consumer import consumer_user_created
+=======
+>>>>>>> 19068ed643c0799e8a3abdf12973e59a3cbef28c
 
 # IMPORTANT:
 # Import consumers so decorators execute
@@ -25,9 +32,12 @@ async def lifespan(app: FastAPI):
         env=settings.APP_ENV,
     )
 
+<<<<<<< HEAD
         # ✅ Launch consumer as background task
     consumer_task = asyncio.create_task(consumer_user_created())  # ✅ matches function name
     
+=======
+>>>>>>> 19068ed643c0799e8a3abdf12973e59a3cbef28c
     logger.info(
         "kafka_configuration",
         bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
